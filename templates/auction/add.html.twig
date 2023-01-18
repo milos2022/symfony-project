@@ -1,0 +1,16 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+<div class="relative container mx-auto overflow-x-auto shadow-md sm:rounded-lg">
+{% for message in app.flashes('fail') %}
+    <div style="color: red;">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('success') %}
+    <div style="color: green;">{{ message }}</div>
+{% endfor %}
+
+{{ form(form) }}
+
+</div>
+
+{% endblock %}

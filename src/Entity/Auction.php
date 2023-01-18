@@ -34,6 +34,9 @@ class Auction
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $closedAt = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $importFilename = null;
+
     public function __construct()
     {
         $this->buyers = new ArrayCollection();
@@ -130,6 +133,18 @@ class Auction
     public function setClosedAt(?\DateTimeImmutable $closedAt): self
     {
         $this->closedAt = $closedAt;
+
+        return $this;
+    }
+
+    public function getImportFilename(): ?string
+    {
+        return $this->importFilename;
+    }
+
+    public function setImportFilename(string $importFilename): self
+    {
+        $this->importFilename = $importFilename;
 
         return $this;
     }

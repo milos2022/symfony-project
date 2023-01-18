@@ -3,6 +3,9 @@
 {% block body %}
 
     <div class="relative container mx-auto overflow-x-auto shadow-md sm:rounded-lg">
+        <div class="my-4">
+            <a href="/auction/add" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4">New Auction</a>
+        </div>
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -11,6 +14,9 @@
                     </th>
                     <th scope="col" class="px-6 py-3">
                         Reserve price
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Complited
                     </th>
                     <th scope="col" class="px-6 py-3">
                         <span class="sr-only">Edit</span>
@@ -27,8 +33,15 @@
                         <td class="px-6 py-4">
                             {{ auction.reservePrice }}
                         </td>
+                        <td class="px-6 py-4 ">
+                            {% if auction.closedAt == null %}
+                                <a href="auction/{{ auction.id }}/run" class="font-medium text-red-600 dark:text-red-500 hover:underline">Run!</a>
+                            {% else %}
+                                {{ auction.closedAt | date('d.m.Y H:i:s') }}
+                            {% endif %}
+                        </td>
                         <td class="px-6 py-4 text-right">
-                            <a href="auction/view/{{ auction.id }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                            <a href="auction/{{ auction.id }}/view" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
                         </td>
                     </tr>
                 {% endfor %}
