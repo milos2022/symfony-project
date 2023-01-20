@@ -10,6 +10,8 @@ use DateTimeImmutable;
 
 class Algorithm
 {
+    private ?Object $jsondata = null;
+
     public function __construct(private string $targetDirectory, private AuctionRepository $auctions, private BuyerRepository $buyers )
     {
         $this->targetDirectory = $targetDirectory;
@@ -19,9 +21,10 @@ class Algorithm
 
     public function run(Auction $auction): SolutionResponse 
     {
-        $jsonData = $this->loadJsonFromFile($auction->getImportFilename());
+        if(is_null($this->jsondata))
+        $this->loadJsonFromFile($auction->getImportFilename());
 
-        $bids = $this->getBiggestBidsFromBuyers($jsonData, $auction);
+        $bids = $this->getBiggestBidsFromBuyers($this->jsondata, $auction);
         $auction->setClosedAt(new DateTimeImmutable());
         $this->auctions->save($auction, true);
 
@@ -37,19 +40,16 @@ class Algorithm
         $bids = array_diff($bids, [array_values($bids)[0]]);
 
         // if there is only one Buyer second price is sealed price
-        $secondPrice = array_shift($bids) ?? $jsonData->reservePrice;
-    
-        $winBuyer = $this->buyers->findOneBy(["name" => $winner, "Auction" => $auction->getId()]);
-        $winBuyer->setWins($secondPrice);
-        $this->buyers->save($winBuyer, true);
+        $secondPrice = array_shift($bids) ?? $auction->getReservePrice();
 
         return new SolutionResponse('success', $winner, $secondPrice, $winnerPrice);
     }
 
-    private function loadJsonFromFile(string $filename) : Object
+    private function loadJsonFromFile(string $filename) : bool
     {
         try{
-            return json_decode(file_get_contents($this->targetDirectory . "/" . $filename));
+            $this->jsondata = json_decode(file_get_contents($this->targetDirectory . "/" . $filename));
+            return true;
         }
         catch(\Exception $e){
             echo "Cant open file";
@@ -72,16 +72,22 @@ class Algorithm
             // ignore buyers with zero bids
             if(count($val) == 0) continue;
 
-            // Biggest bid from Buyer
-            $max = max($val);
-
-            // ignore all bids bellow sealed price
-            if($max < $auction->getReservePrice()) continue;
-                
-            $bids[$key] = max($val);
+            $bids[$key] = intval(max($val));
         }
         arsort($bids);
 
         return $bids;
+    }
+
+    public function getJsondata(): ?Object
+    {
+        return $this->jsondata;
+    }
+
+    public function setJsondata(Object $jsondata): self
+    {
+        $this->jsondata = $jsondata;
+
+        return $this;
     }
 }
